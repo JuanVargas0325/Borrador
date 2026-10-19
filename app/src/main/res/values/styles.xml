@@ -33,6 +33,17 @@
         <item name="cornerRadius">24dp</item>
     </style>
 
+    <style name="Widget.Vinilos.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">@color/md_primary</item>
+        <item name="tint">@color/md_on_primary</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Vinilos.FloatingActionButton</item>
+    </style>
+
+    <style name="ShapeAppearance.Vinilos.FloatingActionButton" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
     <style name="Widget.Vinilos.Snackbar" parent="Widget.Material3.Snackbar">
         <item name="backgroundTint">@color/md_inverse_surface</item>
     </style>

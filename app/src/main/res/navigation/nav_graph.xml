@@ -18,8 +18,12 @@
     <!-- El contenido de cada pestaña lo construye su historia: Álbumes (HU01), Artistas (HU03), Coleccionistas (HU05). -->
     <fragment
         android:id="@+id/albumListFragment"
-        android:name="com.equipo2.vinilos.ui.common.EmptySectionFragment"
-        android:label="@string/album_list_title" />
+        android:name="com.equipo2.vinilos.ui.albums.AlbumListFragment"
+        android:label="@string/album_list_title">
+        <action
+            android:id="@+id/action_albums_to_create"
+            app:destination="@id/albumCreateFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/artistsFragment"
@@ -30,6 +34,11 @@
         android:id="@+id/collectorsFragment"
         android:name="com.equipo2.vinilos.ui.common.EmptySectionFragment"
         android:label="@string/collector_list_title" />
+
+    <fragment
+        android:id="@+id/albumCreateFragment"
+        android:name="com.equipo2.vinilos.ui.albums.create.AlbumCreateFragment"
+        android:label="@string/album_create_title" />
 
     <action
         android:id="@+id/action_global_roleSelect"

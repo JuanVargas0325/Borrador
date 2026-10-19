@@ -37,6 +37,7 @@
         <item name="bottomNavigationStyle">@style/Widget.Vinilos.BottomNavigation</item>
         <item name="materialButtonStyle">@style/Widget.Vinilos.Button</item>
         <item name="snackbarStyle">@style/Widget.Vinilos.Snackbar</item>
+        <item name="floatingActionButtonStyle">@style/Widget.Vinilos.FloatingActionButton</item>
     </style>
 
     <style name="Theme.Vinilos" parent="Base.Theme.Vinilos" />

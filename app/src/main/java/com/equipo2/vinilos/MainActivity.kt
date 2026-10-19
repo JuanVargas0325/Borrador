@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -18,7 +19,9 @@ import androidx.navigation.navOptions
 import com.equipo2.vinilos.data.model.Role
 import com.equipo2.vinilos.databinding.ActivityMainBinding
 import com.equipo2.vinilos.ui.common.AppSnackbar
+import com.equipo2.vinilos.ui.common.Motion
 import com.equipo2.vinilos.ui.common.ThemeModes
+import com.equipo2.vinilos.ui.common.useTabTransitions
 import com.equipo2.vinilos.ui.role.RoleMenu
 import com.equipo2.vinilos.ui.session.SessionEvent
 import com.equipo2.vinilos.ui.session.SessionViewModel
@@ -41,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         applyWindowInsets()
 
         navController = binding.navHost.getFragment<NavHostFragment>().navController
+        binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
         setUpRoleMenu()
         setUpBottomNavigation()
         navController.addOnDestinationChangedListener { _, destination, _ -> onDestinationChanged(destination) }
@@ -87,6 +91,8 @@ class MainActivity : AppCompatActivity() {
     private fun setUpBottomNavigation() {
         binding.bottomNav.setOnItemSelectedListener { item ->
             if (navController.currentDestination?.id != item.itemId) {
+                // La pestaña actual sale con fade through aunque haya abierto antes una pantalla completa.
+                currentFragment()?.useTabTransitions()
                 navController.navigate(item.itemId, null, navOptions {
                     launchSingleTop = true
                     restoreState = true
@@ -103,10 +109,18 @@ class MainActivity : AppCompatActivity() {
             anchor = binding.roleChip.root,
             onRoleSelected = session::changeRole,
             onDarkModeChanged = ::changeDarkMode,
-            onGoHome = { navController.navigate(R.id.action_global_roleSelect) },
+            onGoHome = ::goHome,
         )
         binding.roleChip.root.setOnClickListener { showRoleMenu() }
     }
+
+    private fun goHome() {
+        currentFragment()?.exitTransition = Motion.fade()
+        navController.navigate(R.id.action_global_roleSelect)
+    }
+
+    private fun currentFragment(): Fragment? =
+        binding.navHost.getFragment<NavHostFragment>().childFragmentManager.primaryNavigationFragment
 
     private fun showRoleMenu(animate: Boolean = true) {
         roleMenu.show(session.role.value, ThemeModes.isDark(this), animate)
@@ -141,18 +155,28 @@ class MainActivity : AppCompatActivity() {
         binding.roleChip.root.contentDescription = getString(R.string.cd_change_role, roleName)
     }
 
+    /** Barras según la pantalla: ninguna en la selección de rol; sin barra inferior ni chip en Crear álbum. */
     private fun onDestinationChanged(destination: NavDestination) {
         roleMenu.dismiss()
         val isRoleSelect = destination.id == R.id.roleSelectFragment
+        val isTab = destination.id in TAB_DESTINATIONS
         binding.toolbar.isVisible = !isRoleSelect
         binding.toolbarDivider.isVisible = !isRoleSelect
-        binding.bottomNav.isVisible = !isRoleSelect
-        binding.bottomNavDivider.isVisible = !isRoleSelect
+        binding.bottomNav.isVisible = isTab
+        binding.bottomNavDivider.isVisible = isTab
+        binding.roleChip.root.isVisible = isTab
         binding.toolbar.title = destination.label
-        binding.bottomNav.menu.findItem(destination.id)?.isChecked = true
+        if (isTab) {
+            binding.toolbar.navigationIcon = null
+            binding.bottomNav.menu.findItem(destination.id)?.isChecked = true
+        } else if (destination.id == R.id.albumCreateFragment) {
+            binding.toolbar.setNavigationIcon(R.drawable.ic_close)
+            binding.toolbar.navigationContentDescription = getString(R.string.cd_close_without_saving)
+        }
     }
 
     private companion object {
+        val TAB_DESTINATIONS = setOf(R.id.albumListFragment, R.id.artistsFragment, R.id.collectorsFragment)
         const val KEY_ROLE_MENU_OPEN = "role_menu_open"
         const val SWITCH_ANIMATION_MS = 250L
     }

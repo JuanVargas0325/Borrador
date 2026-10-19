@@ -7,6 +7,7 @@
     <string name="album_list_title">Álbumes</string>
     <string name="artist_list_title">Artistas</string>
     <string name="collector_list_title">Coleccionistas</string>
+    <string name="album_create_title">Crear álbum</string>
 
     <string name="role_select_tagline">Explora álbumes, artistas y coleccionistas de música en vinilo.</string>
     <string name="role_select_question">¿Cómo quieres entrar?</string>
@@ -35,4 +36,6 @@
     <string name="cd_dark_mode_on">Activar modo oscuro</string>
     <string name="cd_dark_mode_off">Activar modo claro</string>
     <string name="cd_logo">Logotipo de Vinilos: un disco de vinilo</string>
+    <string name="cd_create_album">Crear álbum</string>
+    <string name="cd_close_without_saving">Cerrar sin guardar</string>
 </resources>
