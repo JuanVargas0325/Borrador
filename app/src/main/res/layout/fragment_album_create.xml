@@ -7,6 +7,16 @@
     android:background="@color/md_background"
     android:orientation="vertical">
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/savingProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="@color/md_primary"
+        app:trackColor="@color/md_primary_container"
+        app:trackThickness="4dp" />
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/formScroll"
         android:layout_width="match_parent"

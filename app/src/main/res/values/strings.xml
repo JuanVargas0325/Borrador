@@ -44,6 +44,7 @@
     <string name="hint_description">Cuenta de qué trata el álbum…</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_save">Guardar</string>
+    <string name="action_saving">Guardando…</string>
     <string name="action_accept">Aceptar</string>
     <string name="error_album_name_required">Escribe el nombre del álbum.</string>
     <string name="error_cover_required">Escribe la URL de la portada.</string>
@@ -58,6 +59,8 @@
     <string name="discard_body">Perderás lo que escribiste.</string>
     <string name="discard_keep">Seguir editando</string>
     <string name="discard_confirm">Descartar</string>
+    <string name="snackbar_album_created">Álbum creado</string>
+    <string name="error_album_create_failed">No pudimos crear el álbum. Revisa tu conexión e inténtalo de nuevo.</string>
 
     <string name="loading_default">Cargando…</string>
     <string name="error_load_title">No pudimos cargar %1$s</string>

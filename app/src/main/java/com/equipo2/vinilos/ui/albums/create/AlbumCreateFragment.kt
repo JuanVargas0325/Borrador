@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.addCallback
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -14,17 +15,21 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import coil3.load
+import com.equipo2.vinilos.MainActivity
 import com.equipo2.vinilos.R
 import com.equipo2.vinilos.data.model.AlbumCatalog
 import com.equipo2.vinilos.databinding.FragmentAlbumCreateBinding
 import com.equipo2.vinilos.domain.AlbumField
 import com.equipo2.vinilos.domain.AlbumFormValidator
+import com.equipo2.vinilos.ui.albums.AlbumListFragment
 import com.equipo2.vinilos.ui.common.DateFormats
 import com.equipo2.vinilos.ui.common.Motion
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
+import com.google.android.material.progressindicator.IndeterminateDrawable
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -91,6 +96,18 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
         form.genre?.takeIf { it != binding.acGenre.text.toString() }?.let { binding.acGenre.setText(it, false) }
         form.recordLabel?.takeIf { it != binding.acLabel.text.toString() }?.let { binding.acLabel.setText(it, false) }
         renderCoverPreview(binding, form.cover.trim())
+        renderSaving(binding, state.isSaving)
+    }
+
+    /** Guardando: barra de progreso arriba, todo deshabilitado y «Guardando…» con un indicador en el botón. */
+    private fun renderSaving(binding: FragmentAlbumCreateBinding, isSaving: Boolean) {
+        binding.savingProgress.isVisible = isSaving
+        listOf(binding.tilName, binding.tilCover, binding.tilDate, binding.tilGenre, binding.tilLabel, binding.tilDescription)
+            .forEach { it.isEnabled = !isSaving }
+        binding.btnCancel.isEnabled = !isSaving
+        binding.btnSave.isEnabled = !isSaving
+        binding.btnSave.setText(if (isSaving) R.string.action_saving else R.string.action_save)
+        binding.btnSave.icon = if (isSaving) savingIndicator() else null
     }
 
     private fun renderCoverPreview(binding: FragmentAlbumCreateBinding, cover: String) {
@@ -106,6 +123,17 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
     private fun handle(binding: FragmentAlbumCreateBinding, event: AlbumCreateEvent) {
         when (event) {
             is AlbumCreateEvent.ShowErrors -> focusField(binding, event.firstField)
+            is AlbumCreateEvent.Created -> {
+                findNavController().previousBackStackEntry?.savedStateHandle?.set(AlbumListFragment.KEY_CREATED_ALBUM_ID, event.album.id)
+                findNavController().popBackStack()
+            }
+            AlbumCreateEvent.SaveFailed -> (requireActivity() as MainActivity).showSnackbar(
+                message = getString(R.string.error_album_create_failed),
+                isError = true,
+                anchor = binding.actionBar,
+                actionText = getString(R.string.error_network_retry),
+                action = viewModel::save,
+            )
         }
     }
 
@@ -124,7 +152,7 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
     }
 
     private fun openDatePicker() {
-        if (childFragmentManager.findFragmentByTag(DATE_PICKER_TAG) != null) return
+        if (viewModel.state.value.isSaving || childFragmentManager.findFragmentByTag(DATE_PICKER_TAG) != null) return
         val today = LocalDate.now()
         val picker = MaterialDatePicker.Builder.datePicker()
             .setTitleText(R.string.label_release_date)
@@ -144,7 +172,9 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
 
     /** Cerrar, Cancelar o Atrás: si hay algo escrito, pide confirmación antes de descartarlo. */
     private fun requestClose() {
-        if (viewModel.state.value.form.isEmpty) {
+        val state = viewModel.state.value
+        if (state.isSaving) return
+        if (state.form.isEmpty) {
             findNavController().navigateUp()
             return
         }
@@ -159,6 +189,13 @@ class AlbumCreateFragment : Fragment(R.layout.fragment_album_create) {
     private fun hideKeyboard(view: View) {
         val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         keyboard.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    private fun savingIndicator(): IndeterminateDrawable<CircularProgressIndicatorSpec> {
+        val context = requireContext()
+        val spec = CircularProgressIndicatorSpec(context, null, 0, com.google.android.material.R.style.Widget_Material3_CircularProgressIndicator_ExtraSmall)
+        spec.indicatorColors = intArrayOf(ContextCompat.getColor(context, R.color.md_on_surface_variant))
+        return IndeterminateDrawable.createCircularDrawable(context, spec)
     }
 
     private companion object {
