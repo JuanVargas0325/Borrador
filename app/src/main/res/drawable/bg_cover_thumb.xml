@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo del cuadro de la portada: se ve, con el ícono de imagen, mientras no haya portada cargada. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="8dp" />
+    <solid android:color="@color/md_surface_variant" />
+</shape>

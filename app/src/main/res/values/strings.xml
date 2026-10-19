@@ -27,6 +27,38 @@
     <string name="snackbar_role_visitor">Ahora estás en modo visitante</string>
     <string name="snackbar_role_collector">Ahora estás en modo coleccionista</string>
 
+    <string name="form_required_note">Todos los campos son obligatorios (*).</string>
+    <string name="field_album_name">Nombre del álbum *</string>
+    <string name="hint_album_name">Ej. Buscando América</string>
+    <string name="field_cover_url">URL de la portada *</string>
+    <string name="hint_cover_url">https://…/portada.jpg</string>
+    <string name="cover_preview_title">Vista previa de la portada</string>
+    <string name="label_release_date">Fecha de lanzamiento</string>
+    <string name="field_release_date">Fecha de lanzamiento *</string>
+    <string name="help_release_date">Toca el campo para abrir el selector de fecha.</string>
+    <string name="field_genre">Género *</string>
+    <string name="hint_genre">Selecciona un género</string>
+    <string name="field_record_label">Sello discográfico *</string>
+    <string name="hint_record_label">Selecciona un sello</string>
+    <string name="field_description">Descripción *</string>
+    <string name="hint_description">Cuenta de qué trata el álbum…</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_accept">Aceptar</string>
+    <string name="error_album_name_required">Escribe el nombre del álbum.</string>
+    <string name="error_cover_required">Escribe la URL de la portada.</string>
+    <string name="error_cover_invalid">URL no válida. Debe empezar por http:// o https://</string>
+    <string name="error_date_required">Selecciona la fecha de lanzamiento.</string>
+    <string name="error_date_future">La fecha no puede ser futura.</string>
+    <string name="error_genre_required">Selecciona un género.</string>
+    <string name="error_label_required">Selecciona un sello discográfico.</string>
+    <string name="error_description_required">Escribe una descripción.</string>
+    <string name="error_max_length">Puede tener hasta %1$d caracteres.</string>
+    <string name="discard_title">¿Descartar el álbum?</string>
+    <string name="discard_body">Perderás lo que escribiste.</string>
+    <string name="discard_keep">Seguir editando</string>
+    <string name="discard_confirm">Descartar</string>
+
     <string name="loading_default">Cargando…</string>
     <string name="error_load_title">No pudimos cargar %1$s</string>
     <string name="error_network_body">Revisa tu conexión a internet e inténtalo de nuevo.</string>
@@ -38,4 +70,6 @@
     <string name="cd_logo">Logotipo de Vinilos: un disco de vinilo</string>
     <string name="cd_create_album">Crear álbum</string>
     <string name="cd_close_without_saving">Cerrar sin guardar</string>
+    <string name="cd_cover_preview">Vista previa de la portada del álbum</string>
+    <string name="cd_open_date_picker">Abrir el selector de fecha</string>
 </resources>

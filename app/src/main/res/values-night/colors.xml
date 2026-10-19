@@ -24,6 +24,7 @@
     <color name="md_outline">#968CA6</color>
     <color name="md_outline_variant">#352E40</color>
     <color name="md_divider">#2A2433</color>
+    <color name="md_placeholder_icon">#A398B4</color>
     <color name="md_error">#F2B8B5</color>
     <color name="md_on_error">#601410</color>
     <color name="md_error_container">#8C1D18</color>

@@ -36,6 +36,7 @@
         <item name="toolbarStyle">@style/Widget.Vinilos.Toolbar</item>
         <item name="bottomNavigationStyle">@style/Widget.Vinilos.BottomNavigation</item>
         <item name="materialButtonStyle">@style/Widget.Vinilos.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.Vinilos.Button.Outlined</item>
         <item name="snackbarStyle">@style/Widget.Vinilos.Snackbar</item>
         <item name="floatingActionButtonStyle">@style/Widget.Vinilos.FloatingActionButton</item>
     </style>

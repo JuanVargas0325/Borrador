@@ -33,6 +33,45 @@
         <item name="cornerRadius">24dp</item>
     </style>
 
+    <style name="Widget.Vinilos.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">48dp</item>
+        <item name="cornerRadius">24dp</item>
+        <item name="strokeColor">@color/md_outline</item>
+    </style>
+
+    <!-- Campos del formulario: la etiqueta queda siempre arriba y el texto de ejemplo siempre visible. -->
+    <style name="Widget.Vinilos.FormField" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">24dp</item>
+        <item name="expandedHintEnabled">false</item>
+        <item name="boxCornerRadiusTopStart">4dp</item>
+        <item name="boxCornerRadiusTopEnd">4dp</item>
+        <item name="boxCornerRadiusBottomStart">4dp</item>
+        <item name="boxCornerRadiusBottomEnd">4dp</item>
+        <item name="errorIconDrawable">@drawable/ic_error</item>
+        <item name="errorTextAppearance">@style/TextAppearance.Vinilos.LabelSmall</item>
+        <item name="helperTextTextAppearance">@style/TextAppearance.Vinilos.LabelSmall</item>
+    </style>
+
+    <style name="Widget.Vinilos.FormField.Dropdown" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">24dp</item>
+        <item name="expandedHintEnabled">false</item>
+        <item name="boxCornerRadiusTopStart">4dp</item>
+        <item name="boxCornerRadiusTopEnd">4dp</item>
+        <item name="boxCornerRadiusBottomStart">4dp</item>
+        <item name="boxCornerRadiusBottomEnd">4dp</item>
+        <item name="errorIconDrawable">@null</item>
+        <item name="errorTextAppearance">@style/TextAppearance.Vinilos.LabelSmall</item>
+    </style>
+
+    <style name="ShapeAppearance.Vinilos.CoverPreview" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
     <style name="Widget.Vinilos.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
         <item name="backgroundTint">@color/md_primary</item>
         <item name="tint">@color/md_on_primary</item>
