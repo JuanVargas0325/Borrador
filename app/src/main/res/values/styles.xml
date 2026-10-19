@@ -28,6 +28,27 @@
         <item name="android:background">@color/md_outline_variant</item>
     </style>
 
+    <style name="Widget.Vinilos.Button" parent="Widget.Material3.Button">
+        <item name="android:minHeight">48dp</item>
+        <item name="cornerRadius">24dp</item>
+    </style>
+
+    <style name="Widget.Vinilos.Snackbar" parent="Widget.Material3.Snackbar">
+        <item name="backgroundTint">@color/md_inverse_surface</item>
+    </style>
+
+    <style name="Widget.Vinilos.Skeleton.Block" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">120dp</item>
+        <item name="android:background">@drawable/bg_skeleton_block</item>
+    </style>
+
+    <style name="Widget.Vinilos.Skeleton.Line" parent="">
+        <item name="android:layout_height">14dp</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:background">@drawable/bg_skeleton_line</item>
+    </style>
+
     <!-- Tipografía (sección 5.2 de la guía). Roboto del sistema; sans-serif-medium hace de SemiBold en API 21. -->
     <style name="TextAppearance.Vinilos.DisplaySmall" parent="TextAppearance.Material3.DisplaySmall">
         <item name="android:textSize">40sp</item>

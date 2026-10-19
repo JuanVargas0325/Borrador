@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:indicatorColor="@color/md_primary"
+        app:trackColor="@color/md_primary_container"
+        app:trackThickness="4dp" />
+
+    <TextView
+        android:id="@+id/loadingText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:text="@string/loading_default"
+        android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+        android:textColor="@color/md_on_surface_variant"
+        tools:text="Cargando álbumes…" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:importantForAccessibility="noHideDescendants"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <View style="@style/Widget.Vinilos.Skeleton.Block" />
+
+        <View
+            style="@style/Widget.Vinilos.Skeleton.Line"
+            android:layout_width="200dp" />
+
+        <View
+            style="@style/Widget.Vinilos.Skeleton.Block"
+            android:layout_marginTop="24dp" />
+
+        <View
+            style="@style/Widget.Vinilos.Skeleton.Line"
+            android:layout_width="160dp" />
+    </LinearLayout>
+</LinearLayout>
