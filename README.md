@@ -1,22 +1,24 @@
-# Vinilos · Paso 2 de 9: T1 · Configuración, capa de red y estructura MVVM
+# Vinilos · Paso 3 de 9: T2 · Tema claro y oscuro y navegación
 
-Tarea de la HU07: **«Crear el proyecto con la capa de red, la estructura MVVM y la configuración de pruebas»**.
+Tarea de la HU07: **«Construir la base visual (tema claro y oscuro) y la navegación de la app»**.
 
-Este paso prepara el proyecto para el curso y deja lista la comunicación con BackVynils:
+Al terminar este paso la app ya se ve como el diseño:
 
-- Baja el `minSdk` de 24 a **21** (Android 5.0), que es lo que exige la rúbrica.
-- Fija las librerías en las últimas versiones que todavía funcionan en Android 5.0.
-- Agrega las librerías de red (Retrofit, OkHttp, kotlinx.serialization), de corrutinas y de ViewModel.
-- Crea la capa de datos con los patrones que pide el curso: **Service Adapter** (`NetworkServiceAdapter`) y
-  **Repository** (`AlbumRepository`). La parte de vista y ViewModel de MVVM llega en los pasos siguientes.
+- Colores del diseño en claro y en oscuro (el oscuro sigue la configuración del teléfono; el interruptor manual llega
+  en el paso 5).
+- Tipografía del diseño.
+- Ícono de la app propio (disco de vinilo).
+- Barra superior con el título de la pantalla y barra inferior con las pestañas **Álbumes**, **Artistas** y
+  **Coleccionistas**.
+- Transición *fade through* al cambiar de pestaña.
 
-La app todavía muestra «Hello World!»: la capa de red existe, pero ninguna pantalla la usa hasta el paso 8.
+Las tres pestañas quedan **vacías a propósito**: su contenido lo construye la historia de cada una (HU01, HU03 y HU05).
 
 | Paso | Commit |
 |---|---|
 | 1 | Proyecto base de Android Studio |
-| **2** | **T1 · Configuración, capa de red y estructura MVVM** |
-| 3 | T2 · Tema claro y oscuro y navegación |
+| 2 | T1 · Configuración, capa de red y estructura MVVM |
+| **3** | **T2 · Tema claro y oscuro y navegación** |
 | 4 | T3 · Componentes de carga, error, vacío y avisos |
 | 5 | T4 · Selección de rol y menú de rol |
 | 6 | T5 · Botón + en Álbumes |
@@ -24,731 +26,637 @@ La app todavía muestra «Hello World!»: la capa de red existe, pero ninguna pa
 | 8 | T7 · Creación del álbum en la API |
 | 9 | T8 · Pruebas de la historia |
 
-## Lo que se aprendió de BackVynils y cómo se aplica
-
-Antes de escribir la capa de red se revisó el código de BackVynils (`src/album/album.service.ts`) y se probó el
-servidor desplegado:
-
-| Comportamiento de la API | Cómo lo maneja este paso |
-|---|---|
-| `POST /albums` recibe `name`, `cover`, `releaseDate`, `description`, `genre` y `recordLabel`, todos obligatorios | `CreateAlbumRequest` tiene exactamente esos seis campos |
-| `genre` solo acepta `Classical`, `Salsa`, `Rock`, `Folk`; `recordLabel` solo `Sony Music`, `EMI`, `Discos Fuentes`, `Elektra`, `Fania Records`. Otro valor responde **400** con `ValidationError: "genre" must be one of …` | `AlbumCatalog` guarda las dos listas para que el formulario (paso 7) solo ofrezca valores válidos |
-| `releaseDate` debe ser una fecha válida; con texto inválido responde **400** | `toApiDate` envía siempre el formato ISO completo `1984-08-01T00:00:00.000Z` |
-| Responde **200** (no 201) con el álbum creado, incluido su `id` | Retrofit trata cualquier 2xx como éxito; `AlbumDto` lee la respuesta |
-| La respuesta trae más campos de los que usa la app | `ignoreUnknownKeys = true` evita errores por campos desconocidos |
-| Al crear y al actualizar exige todos los campos y una fecha válida, así que siempre responde los álbumes completos (los 310 del servidor traen su fecha en formato ISO) | `AlbumDto` y `Album` declaran todos los campos obligatorios, sin valores por defecto ni nulos: la app confía en el contrato de la API |
-| No valida que `cover` sea una URL ni que la fecha no sea futura ni la longitud de los textos | Esas reglas las hará la app en el formulario (paso 7) |
-| Está en Render: la primera petición puede tardar varios segundos mientras el servidor despierta | Tiempos de espera de 30 s en OkHttp |
-| Los mensajes de error están en inglés | La app nunca los muestra; el repositorio solo informa "falló" y la pantalla muestra su propio texto |
-
 ## Orden en que se hicieron los cambios
 
-1. `gradle/libs.versions.toml`: bajar las versiones a las compatibles con API 21 y agregar las librerías nuevas.
-2. `build.gradle.kts` (raíz): declarar el plugin de serialización de Kotlin.
-3. `app/build.gradle.kts`: `minSdk = 21`, la URL de la API en `BuildConfig`, *desugaring* de `java.time` y las
-   dependencias nuevas.
-4. `AndroidManifest.xml`: permiso de Internet.
-5. `data/model/Album.kt`: modelos de la app.
-6. `data/network/AlbumDto.kt`: forma del JSON de la API.
-7. `data/network/VinilosApiService.kt`: el endpoint `POST /albums` para Retrofit.
-8. `data/network/NetworkServiceAdapter.kt`: el Service Adapter.
-9. `data/repository/AlbumRepository.kt`: el repositorio.
-10. `data/repository/ResultOf.kt`: `resultOf`, que comparten todos los repositorios.
-11. `ServiceLocator.kt`: la inyección de dependencias manual.
-12. Compilar y verificar que el proyecto sigue construyendo con `minSdk = 21`.
+1. Gradle: agregar Fragment y Navigation, activar View Binding y quitar ConstraintLayout (ya no se usa).
+2. Colores: `values/colors.xml` (claro) y `values-night/colors.xml` (oscuro) con los tokens de la guía.
+3. Tema: `values/themes.xml` con los roles de color de Material 3; borrar `values-night/themes.xml` (ya no hace falta).
+4. Estilos: `values/styles.xml` con la barra superior, la barra inferior, el divisor y la tipografía; selectores de
+   color de la barra inferior en `res/color/`.
+5. Íconos: los de las pestañas (`ic_album`, `ic_mic`, `ic_groups`) y el ícono de la app (reemplaza el robot de
+   Android y borra las imágenes `.webp`).
+6. Textos en `strings.xml`.
+7. Navegación: `menu/bottom_nav.xml` y `navigation/nav_graph.xml`.
+8. Layouts: `activity_main.xml` (estructura de la app) y `fragment_empty_section.xml`.
+9. Código: `Motion.kt`, `EmptySectionFragment.kt` y `MainActivity.kt`.
+10. Probar en el emulador (Android 17).
 
 ## Cómo ejecutarlo
 
-1. En Android Studio, **File › Sync Project with Gradle Files** (cambiaron los archivos de Gradle).
-2. Elegir un emulador o teléfono con **Android 5.0 (API 21) o superior**.
-3. **Run ▶**. La app sigue mostrando «Hello World!»: lo nuevo de este paso no tiene interfaz.
-
-```bash
-./gradlew assembleDebug
-./gradlew testDebugUnitTest
-```
+1. **File › Sync Project with Gradle Files**.
+2. Elegir un emulador o teléfono con Android 5.0 o superior y pulsar **Run ▶**.
+3. Se ve la pestaña Álbumes vacía. Al tocar Artistas o Coleccionistas cambia el título y la pantalla hace la
+   transición; Atrás desde Artistas o Coleccionistas vuelve a Álbumes.
+4. Para ver el tema oscuro: activar el modo oscuro del teléfono (Ajustes › Pantalla) y volver a la app.
 
 ---
 
 ## Explicación de cada archivo
 
-### Estructura de lo nuevo
-
-```
-app/src/main/java/com/equipo2/vinilos/
-├── ServiceLocator.kt                  Crea y comparte las dependencias
-└── data/
-    ├── model/Album.kt                 Modelos que usa la app
-    ├── network/
-    │   ├── AlbumDto.kt                Forma del JSON que envía y recibe la API
-    │   ├── VinilosApiService.kt       Endpoints de la API (Retrofit)
-    │   └── NetworkServiceAdapter.kt   Service Adapter: única puerta a la API
-    └── repository/
-        ├── AlbumRepository.kt         Repository: lo que las pantallas le piden a los datos
-        └── ResultOf.kt                Convierte la respuesta o el error en un Result (lo usan todos los repositorios)
-```
-
-Cómo se relacionan (las flechas son "usa a"):
-
-```
-(Pantalla y ViewModel, pasos 7 y 8) → AlbumRepository → NetworkServiceAdapter → VinilosApiService (Retrofit) → BackVynils
-```
-
----
-
 ### `gradle/libs.versions.toml` · modificado por mí
 
-#### Por qué se bajaron versiones
-
-Desde mediados de 2025, las versiones nuevas de AndroidX exigen Android 6.0 (API 23) o 7.0 (API 24). Con `minSdk = 21`
-y las versiones que puso el asistente, la compilación falla en el paso *manifest merger* con un error como
-`uses-sdk:minSdkVersion 21 cannot be smaller than version 23 declared in library …`. Por eso se usan las últimas
-versiones que todavía declaran API 21:
-
-| Librería | Versión del paso 1 (exige) | Versión ahora (exige) |
-|---|---|---|
-| `core-ktx` | 1.19.1 (API 23) | **1.17.0** (API 21) |
-| `appcompat` | 1.8.0 (API 23) | **1.7.1** (API 21) |
-| `material` | 1.14.0 (API 23) | **1.13.0** (API 21) |
-| `activity-ktx` | 1.13.0 (API 23) | **1.11.0** (API 21) |
-| `constraintlayout` | 2.2.2 (API 21) | 2.2.2 (sin cambio) |
-| Las de pruebas (`junit`, `androidx.test.ext:junit`, `espresso`) | API 21 | sin cambio |
-
-**Regla para el equipo:** no subir estas versiones (aunque Android Studio lo sugiera con una advertencia amarilla)
-sin comprobar que la nueva versión todavía soporta API 21.
-
-#### El archivo completo
+Cambios respecto al paso 2 (el resto del archivo quedó igual):
 
 ```toml
-[versions]
-agp = "9.4.1"
-kotlin = "2.2.10"
-```
-
-- `agp`: igual que en el paso 1.
-- `kotlin` (**nuevo**): versión de los plugins de Kotlin que se agregan aparte. AGP 9 trae Kotlin incluido en la
-  versión 2.2.10, así que el plugin de serialización debe usar exactamente la misma versión.
-
-```toml
-coreKtx = "1.17.0"
-junit = "4.13.2"
-junitVersion = "1.3.0"
-espressoCore = "3.7.0"
-appcompat = "1.7.1"
-material = "1.13.0"
-activityKtx = "1.11.0"
-constraintlayout = "2.2.2"
-```
-
-- Las mismas librerías del paso 1, con las versiones de la tabla anterior.
-
-```toml
+fragment = "1.8.9"
 lifecycle = "2.9.4"
-coroutines = "1.10.2"
-kotlinxSerialization = "1.9.0"
-retrofit = "3.0.0"
-okhttp = "4.12.0"
-desugarJdkLibs = "2.1.5"
+navigation = "2.9.8"
 ```
 
-Versiones **nuevas**:
-
-| Nombre | Para qué |
-|---|---|
-| `lifecycle` 2.9.4 | `ViewModel` y `lifecycleScope` (la última que soporta API 21; la 2.10 exige API 23) |
-| `coroutines` 1.10.2 | Corrutinas de Kotlin: tareas en segundo plano como las llamadas de red, sin bloquear la pantalla |
-| `kotlinxSerialization` 1.9.0 | Convertir objetos Kotlin a JSON y de JSON a objetos (la serie 1.9 es la compatible con Kotlin 2.2) |
-| `retrofit` 3.0.0 | Cliente HTTP declarativo: los endpoints se escriben como funciones de una interfaz |
-| `okhttp` 4.12.0 | El cliente HTTP que usa Retrofit por debajo; aquí se configuran los tiempos de espera |
-| `desugarJdkLibs` 2.1.5 | Permite usar `java.time` (`LocalDate`) en Android 5.0, que no lo trae (llegó en API 26) |
+- `constraintlayout` se **quitó**: la nueva estructura de pantallas no usa `ConstraintLayout`.
+- `fragment` (**nueva**): 1.8.9 es la última que soporta API 21.
+- `navigation` (**nueva**): 2.9.8 es la última que soporta API 21 (la 2.10 exige API 24).
 
 ```toml
-[libraries]
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 ```
 
-- Sin cambios respecto al paso 1.
-
-```toml
-androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
-```
-
-- **Nuevas.** `lifecycle-viewmodel-ktx`: la clase `ViewModel` y `viewModelScope` (corrutinas que se cancelan solas
-  cuando la pantalla se destruye). `lifecycle-runtime-ktx`: `lifecycleScope` y `repeatOnLifecycle`, para escuchar
-  datos solo mientras la pantalla está visible.
-
-```toml
-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
-```
-
-- **Nuevas.** `kotlinx-coroutines-android`: corrutinas con el hilo principal de Android (`Dispatchers.Main`).
-  `kotlinx-coroutines-test`: herramientas para probar corrutinas (`runTest`), que usarán las pruebas del paso 9.
-
-```toml
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-```
-
-- **Nuevas.** El formato JSON de kotlinx.serialization, Retrofit, el conversor que conecta Retrofit con
-  kotlinx.serialization y OkHttp.
-
-```toml
-desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
-```
-
-- **Nueva.** La librería de *desugaring* (se explica en `app/build.gradle.kts`).
-
-```toml
-[plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-```
-
-- `kotlin-serialization` (**nuevo**): el plugin del compilador que genera, para cada clase marcada con
-  `@Serializable`, el código que la convierte a JSON y de vuelta.
-
----
-
-### `build.gradle.kts` (raíz) · modificado por mí
-
-```kotlin
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-plugins {
-    alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.serialization) apply false
-}
-```
-
-- La única línea nueva es `alias(libs.plugins.kotlin.serialization) apply false`: declara el plugin de serialización
-  con su versión, sin aplicarlo a la raíz. Lo aplica el módulo `app`. El resto se explicó en el paso 1.
-
----
+- `fragment-ktx`: los **Fragments** (pedazos de pantalla que se cambian dentro de la actividad) y las funciones
+  `by viewModels()` y `by activityViewModels()` que se usarán en los pasos siguientes.
+- `navigation-fragment-ktx`: el **Navigation Component**: `NavHostFragment`, el grafo de navegación y
+  `NavController`, que cambia de fragment según el grafo.
+- Se quitó la línea de `androidx-constraintlayout`.
 
 ### `app/build.gradle.kts` · modificado por mí
 
 ```kotlin
-plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.serialization)
-}
-```
-
-- **Nuevo:** aplica el plugin de serialización al módulo de la app, para que las clases `@Serializable` funcionen.
-
-```kotlin
-android {
-    namespace = "com.equipo2.vinilos"
-    compileSdk {
-        version = release(37)
-    }
-```
-
-- Sin cambios (paso 1).
-
-```kotlin
-    defaultConfig {
-        applicationId = "com.equipo2.vinilos"
-        minSdk = 21
-        targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "API_BASE_URL", "\"https://backvynils-q6yc.onrender.com/\"")
-    }
-```
-
-- `minSdk = 21` (**cambió** de 24): la app se puede instalar desde Android 5.0 Lollipop, como pide el curso.
-- `buildConfigField(…)` (**nuevo**): crea la constante `BuildConfig.API_BASE_URL` con la dirección del backend. Sus
-  tres argumentos son el tipo (`"String"`), el nombre y el valor escrito como código Java (por eso lleva comillas
-  escapadas `\"…\"`). Así la URL vive en un solo lugar y el código no la tiene escrita a mano. La barra `/` final es
-  obligatoria para Retrofit.
-- El resto, sin cambios.
-
-```kotlin
-    buildTypes {
-        release {
-            optimization {
-                enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
-            }
-        }
-    }
-```
-
-- Sin cambios (paso 1).
-
-```kotlin
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-        isCoreLibraryDesugaringEnabled = true
-    }
-```
-
-- `isCoreLibraryDesugaringEnabled = true` (**nuevo**): activa el *desugaring* de librerías. El compilador reemplaza las
-  clases de Java que no existen en Android viejo (como `java.time.LocalDate`, que llegó en Android 8.0) por una copia
-  que se incluye en el APK. Así la app maneja fechas igual en Android 5.0 que en Android 17.
-
-```kotlin
     buildFeatures {
         buildConfig = true
+        viewBinding = true
     }
-}
 ```
 
-- **Nuevo.** AGP 9 ya no genera la clase `BuildConfig` por defecto; hay que activarla para que exista
-  `BuildConfig.API_BASE_URL`.
+- `viewBinding = true` (**nuevo**): por cada layout XML, Gradle genera una clase (`activity_main.xml` →
+  `ActivityMainBinding`) con una propiedad por cada vista que tenga `android:id`. Reemplaza a `findViewById`: es
+  seguro (si el id no existe, no compila) y no hace falta convertir tipos.
 
 ```kotlin
-dependencies {
-    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(libs.androidx.fragment.ktx)
+    …
+    implementation(libs.androidx.navigation.fragment.ktx)
 ```
 
-- **Nuevo.** `coreLibraryDesugaring(…)` es la configuración especial que indica qué librería usar para el
-  *desugaring*.
-
-```kotlin
-    implementation(libs.androidx.activity.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
-```
-
-- Las mismas del paso 1 (ahora con las versiones fijadas en el catálogo).
-
-```kotlin
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.kotlinx.serialization)
-    implementation(libs.okhttp)
-```
-
-- **Nuevas:** ViewModel, lifecycle, corrutinas, serialización JSON, Retrofit con su conversor y OkHttp.
-
-```kotlin
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
-}
-```
-
-- `testImplementation(libs.kotlinx.coroutines.test)` (**nueva**): queda lista para las pruebas de los ViewModels.
-- El resto, sin cambios.
+- Se agregan Fragment y Navigation, y se quitó `implementation(libs.androidx.constraintlayout)`. El resto quedó igual.
 
 ---
 
-### `app/src/main/AndroidManifest.xml` · modificado por mí
+### `res/values/colors.xml` · modificado por mí
+
+Reemplaza los dos colores de ejemplo (`black`, `white`) por los **tokens de color** de la guía de diseño (sección 5.1).
+El comentario del inicio aclara que es el tema claro y anota el único ajuste del equipo: un `primary_container` más
+oscuro que el de la guía.
+
+Cada línea `<color name="…">#RRGGBB</color>` define un color. El prefijo `md_` viene de *Material Design* y el resto
+del nombre es el rol de Material 3:
+
+| Color | Claro | Dónde se usa |
+|---|---|---|
+| `md_primary` | `#6A2FA0` | Color principal: botones rellenos, botón +, enlaces, campo enfocado |
+| `md_on_primary` | `#FFFFFF` | Texto e íconos sobre `primary` |
+| `md_primary_container` | `#D5B9F5` | Indicador de la pestaña activa, círculos de íconos, chips (ajuste del equipo: la guía usa `#EADCFA`, que contra la barra inferior tenía un contraste de 1,07:1 y casi no se veía; con `#D5B9F5` sube a 1,43:1 y el ícono encima conserva 9,4:1) |
+| `md_on_primary_container` | `#2E0A52` | Texto e íconos sobre `primary_container` |
+| `md_inverse_primary` | `#CDA8FF` | Acciones dentro del aviso (snackbar), que tiene fondo oscuro |
+| `md_secondary` … `md_on_secondary_container` | `#625B71`, `#FFFFFF`, `#E8DEF8`, `#1D192B` | Valores base de Material 3; el diseño no los usa, pero algunos componentes los piden |
+| `md_tertiary`, `md_on_tertiary` | `#C2410C`, `#FFFFFF` | Estrellas de calificación (HU02) |
+| `md_background`, `md_surface` | `#F6F4F9` | Fondo de todas las pantallas y de la barra superior |
+| `md_on_background`, `md_on_surface` | `#1E1A26` | Texto principal |
+| `md_surface_variant` | `#E4DDEE` | Marcadores de portadas y bloques de carga (*skeleton*) |
+| `md_on_surface_variant` | `#4F4760` | Texto secundario e íconos |
+| `md_surface_container_lowest` | `#FFFFFF` | Tarjetas |
+| `md_surface_container` | `#ECE7F3` | Barra inferior y círculos de los estados vacío y error |
+| `md_surface_container_high` | `#F7F3FC` | Menús desplegables |
+| `md_outline` | `#7C7290` | Bordes de campos de texto y del chip de rol |
+| `md_outline_variant` | `#DED7E8` | Líneas divisoras |
+| `md_error`, `md_on_error`, `md_error_container`, `md_on_error_container` | `#B3261E`, `#FFFFFF`, `#F9DEDC`, `#410E0B` | Mensajes de error |
+| `md_inverse_surface`, `md_inverse_on_surface` | `#2A2335`, `#F3EDFA` | Fondo y texto del aviso (snackbar) |
+| `launcher_background` | `#6A2FA0` | Fondo del ícono de la app |
+
+Todos los textos cumplen el contraste mínimo de accesibilidad (WCAG AA, 4.5:1) sobre el fondo: texto principal 15.6:1,
+secundario 8.0:1, `primary` 7.6:1 y error 6.0:1.
+
+### `res/values-night/colors.xml` · creado por mí
+
+Los mismos nombres con los valores del tema oscuro (por ejemplo, `md_primary` = `#CDA8FF` y `md_background` =
+`#14111A`). Cuando el teléfono está en modo oscuro, Android toma los colores de `values-night` en lugar de los de
+`values`, así que **el tema no se repite**: solo cambian los colores. `launcher_background` no se redefine porque el
+ícono es igual en los dos modos.
+
+### `res/values-night/themes.xml` · borrado
+
+La plantilla lo creó para personalizar el tema oscuro. Ya no hace falta, porque el cambio de colores lo hace
+`values-night/colors.xml`.
+
+### `res/values/themes.xml` · modificado por mí
 
 ```xml
-    <uses-permission android:name="android.permission.INTERNET" />
+<resources>
+    <!-- Material 3 sin color dinámico: los colores cambian en oscuro por values-night/colors.xml. -->
+    <style name="Base.Theme.Vinilos" parent="Theme.Material3.DayNight.NoActionBar">
 ```
 
-- Es la **única línea nueva**: sin este permiso Android bloquea cualquier conexión a Internet y Retrofit fallaría.
-  Es un permiso "normal": se concede al instalar, sin preguntarle al usuario. Va dentro de `<manifest>` y antes de
-  `<application>`. El resto del archivo no cambió (se explicó en el paso 1).
+- Mantiene la estructura de la plantilla (`Base.Theme.Vinilos` y `Theme.Vinilos`) y el mismo padre de Material 3.
+- Se quitó `xmlns:tools` porque ya no se usa.
+- "Sin color dinámico": Android 12+ puede tomar los colores del fondo de pantalla; el diseño usa siempre la paleta
+  violeta, así que no se activa (`DynamicColors` nunca se llama).
+
+```xml
+        <item name="colorPrimary">@color/md_primary</item>
+        <item name="colorOnPrimary">@color/md_on_primary</item>
+        …
+        <item name="colorOnSurfaceInverse">@color/md_inverse_on_surface</item>
+```
+
+- Cada `<item name="colorX">` asigna un **rol de color** de Material 3 a uno de los tokens de `colors.xml`. Los
+  componentes de Material (botones, campos, barras) leen estos roles, así que con esto toda la app toma la paleta.
+- `android:colorBackground` lleva el prefijo `android:` porque es un atributo del sistema, no de Material.
+- `colorSurfaceContainerLow` y `colorSurfaceContainerHighest` no están en la guía; se igualan al más cercano para que
+  ningún componente use un color fuera de la paleta.
+
+```xml
+        <item name="android:windowBackground">@color/md_background</item>
+        <item name="toolbarStyle">@style/Widget.Vinilos.Toolbar</item>
+        <item name="bottomNavigationStyle">@style/Widget.Vinilos.BottomNavigation</item>
+    </style>
+
+    <style name="Theme.Vinilos" parent="Base.Theme.Vinilos" />
+</resources>
+```
+
+- `android:windowBackground`: el color de la ventana mientras la app abre, para que no se vea un destello blanco.
+- `toolbarStyle` y `bottomNavigationStyle`: el estilo por defecto de todas las `MaterialToolbar` y
+  `BottomNavigationView` de la app (definidos en `styles.xml`).
+
+### `res/values/styles.xml` · creado por mí
+
+Estilos de componentes y tipografía. Un estilo es un conjunto de atributos con nombre; `parent` es el estilo del que
+hereda.
+
+```xml
+    <style name="Widget.Vinilos.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@color/md_surface</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Vinilos.TitleLarge</item>
+        <item name="navigationIconTint">@color/md_on_surface</item>
+    </style>
+```
+
+- Barra superior: fondo `surface`, título con el estilo `TitleLarge` y el ícono de la izquierda (por ejemplo, la X de
+  cerrar del paso 6) en el color del texto.
+
+```xml
+    <style name="Widget.Vinilos.BottomNavigation" parent="Widget.Material3.BottomNavigationView">
+        <item name="backgroundTint">@color/md_surface_container</item>
+        <item name="elevation">0dp</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.Vinilos.BottomNavigation.ActiveIndicator</item>
+        <item name="itemIconTint">@color/nav_item_icon</item>
+        <item name="itemTextColor">@color/nav_item_text</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.Vinilos.LabelMedium.Bold</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.Vinilos.LabelMedium</item>
+    </style>
+```
+
+- Barra inferior: fondo `surface_container`, sin sombra (`elevation` 0; el diseño es plano y usa una línea divisora).
+- `labelVisibilityMode` `labeled`: las etiquetas de las tres pestañas siempre se ven.
+- `itemActiveIndicatorStyle`: la "píldora" detrás del ícono activo.
+- `itemIconTint` / `itemTextColor`: colores que cambian según la pestaña esté activa o no (selectores de `res/color/`).
+- Etiqueta activa en negrita e inactiva normal, como pide la guía.
+
+```xml
+    <style name="Widget.Vinilos.BottomNavigation.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/md_primary_container</item>
+    </style>
+```
+
+- La píldora de la pestaña activa en `primary_container` (Material 3 usaría `secondary_container`; la guía pide este).
+
+```xml
+    <style name="Widget.Vinilos.Divider" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/md_outline_variant</item>
+    </style>
+```
+
+- Línea divisora de 1 dp a todo el ancho. `parent=""` evita que herede de un estilo "Widget.Vinilos" que no existe
+  (en Android, un nombre con puntos hereda implícitamente del prefijo).
+
+```xml
+    <!-- Tipografía (sección 5.2 de la guía). Roboto del sistema; sans-serif-medium hace de SemiBold en API 21. -->
+```
+
+- La guía usa peso SemiBold (600), pero `android:textFontWeight` solo existe desde Android 9. En Android 5 la forma de
+  obtener un peso intermedio es la familia `sans-serif-medium`.
+
+Cada `TextAppearance.Vinilos.X` es un estilo de texto. Heredan de los de Material 3 y cambian el tamaño (y a veces el
+peso y el color):
+
+| Estilo | Tamaño | Peso | Dónde se usa |
+|---|---|---|---|
+| `DisplaySmall` | 40 sp | Negrita | «Vinilos» en la selección de rol |
+| `HeadlineSmall` | 22 sp | Medium | Títulos de los estados vacío y error |
+| `TitleLarge` | 22 sp | Normal | Título de la barra superior |
+| `TitleMedium` | 18 sp | Medium | Títulos de los botones de rol |
+| `BodyLarge` | 16 sp | Normal | Textos y campos |
+| `BodyMedium` | 14 sp | Normal | Textos secundarios |
+| `LabelLarge` | 14 sp | Medium | Botones y chip de rol |
+| `LabelMedium` | 12 sp | Normal | Etiquetas de la barra inferior |
+| `LabelMedium.Bold` | 12 sp | Negrita | Etiqueta de la pestaña activa (hereda de `LabelMedium` por el nombre) |
+| `LabelSmall` | 13 sp | Normal | Mensajes de error y ayuda de los campos |
+
+- `sp` (píxeles escalables) crece con el tamaño de letra que el usuario elige en el teléfono.
+- Se repite `android:fontFamily` y `fontFamily` porque Material lee uno u otro según el componente.
+
+### `res/color/nav_item_icon.xml` y `res/color/nav_item_text.xml` · creados por mí
+
+```xml
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/md_on_primary_container" android:state_checked="true" />
+    <item android:color="@color/md_on_surface_variant" />
+</selector>
+```
+
+- Un `selector` es un color que depende del estado: Android recorre los `item` en orden y usa el primero que coincide.
+- Pestaña activa (`state_checked="true"`): ícono `on_primary_container` (texto: `on_surface`). Si no: `on_surface_variant`.
 
 ---
 
-### `app/src/main/java/com/equipo2/vinilos/data/model/Album.kt` · creado por mí
+### Íconos de las pestañas · creados por mí
 
-Los **modelos de dominio**: cómo representa la app un álbum, independiente de cómo lo envía la API.
+`res/drawable/ic_album.xml`, `ic_mic.xml` e `ic_groups.xml` son los íconos de Material Symbols (estilo Outlined) que
+pide la guía: disco para Álbumes, micrófono para Artistas y grupo de personas para Coleccionistas. Se descargaron como
+SVG del repositorio oficial de Google y se convirtieron a *vector drawable*:
 
-```kotlin
-package com.equipo2.vinilos.data.model
-
-import java.time.LocalDate
+```xml
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <group android:translateY="960">
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M480-300q75 0 …" />
+    </group>
+</vector>
 ```
 
-- El paquete `data.model` agrupa los modelos. `LocalDate` representa una fecha sin hora (funciona en API 21 gracias al
-  *desugaring*).
+- `width`/`height`: tamaño en pantalla (24 dp).
+- `viewportWidth`/`viewportHeight`: el sistema de coordenadas del dibujo (960 × 960, el de Material Symbols).
+- `<group android:translateY="960">`: los SVG de Material Symbols dibujan entre y = −960 y 0; el grupo los baja 960
+  unidades para que queden dentro del lienzo.
+- `fillColor` negro: es solo la forma; el color real lo pone quien usa el ícono (la barra inferior lo tiñe con el
+  selector).
+- `pathData`: el trazo del dibujo.
 
-```kotlin
-data class Album(
-    val id: Int,
-    val name: String,
-    val cover: String,
-    val releaseDate: LocalDate,
-    val description: String,
-    val genre: String,
-    val recordLabel: String,
-)
+### Ícono de la app · modificados y creados por mí
+
+| Archivo | Cambio |
+|---|---|
+| `res/drawable/ic_launcher_background.xml` | **Modificado**: un cuadrado de 108 × 108 en `launcher_background` (morado), en lugar de la cuadrícula verde |
+| `res/drawable/ic_launcher_foreground.xml` | **Modificado**: un disco de vinilo (círculo blanco, etiqueta morada y lila, agujero central) en lugar del robot. Va dentro de la zona segura de 66 dp para que ningún launcher lo recorte |
+| `res/mipmap-anydpi-v26/ic_launcher.xml` y `ic_launcher_round.xml` | Sin cambios: siguen uniendo fondo, primer plano y monocromo, ahora con los dibujos nuevos |
+| `res/mipmap-anydpi/ic_launcher.xml` | **Creado**: el ícono para Android 5.0 a 7.1 (no tienen íconos adaptativos). Es un `layer-list`: dos capas una encima de otra, un óvalo morado y el disco |
+| `res/mipmap-anydpi/ic_launcher_round.xml` | **Creado**: la versión redonda, que reutiliza la anterior |
+| `res/mipmap-*dpi/*.webp` | **Borrados**: eran el robot de Android en imágenes; el `layer-list` vectorial las reemplaza en todas las densidades |
+
+Los paths `M54,24a30,30 0,1 1,0 60a30,30 0,1 1,0 -60z` dibujan círculos: se mueven al punto superior (`M`) y trazan
+dos arcos (`a`) de medio círculo cada uno.
+
+---
+
+### `res/values/strings.xml` · modificado por mí
+
+```xml
+<resources>
+    <string name="app_name">Vinilos</string>
+
+    <string name="nav_albums">Álbumes</string>
+    <string name="nav_artists">Artistas</string>
+    <string name="nav_collectors">Coleccionistas</string>
+    <string name="album_list_title">Álbumes</string>
+    <string name="artist_list_title">Artistas</string>
+    <string name="collector_list_title">Coleccionistas</string>
+</resources>
 ```
 
-- `data class`: clase para guardar datos. Kotlin le genera `equals`, `hashCode`, `toString` y `copy`.
-- `val`: propiedades de solo lectura; un álbum no cambia después de creado.
-- `releaseDate: LocalDate`: sin `?`, porque BackVynils exige la fecha de todo álbum. Solo el formulario (paso 7) la
-  maneja como opcional, mientras el usuario no la ha elegido.
-- La coma después del último parámetro (*trailing comma*) es válida en Kotlin y facilita agregar campos.
+- `nav_*`: las etiquetas de la barra inferior.
+- `*_title`: los títulos de la barra superior. Son textos separados aunque hoy digan lo mismo, porque cumplen funciones
+  distintas y la guía los define por separado.
 
-```kotlin
-/** Datos para crear un álbum, antes de que la API le asigne un id. */
-data class NewAlbum(
-    val name: String,
-    val cover: String,
-    val releaseDate: LocalDate,
-    val description: String,
-    val genre: String,
-    val recordLabel: String,
-)
+---
+
+### `res/menu/bottom_nav.xml` · creado por mí
+
+```xml
+<!-- Los ids coinciden con los destinos de nav_graph.xml. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/albumListFragment"
+        android:icon="@drawable/ic_album"
+        android:title="@string/nav_albums" />
+    …
+</menu>
 ```
 
-- Un álbum que todavía no existe: no tiene `id` (lo asigna la API) y la fecha es obligatoria (sin `?`), porque la API
-  la exige.
+- Las tres opciones de la barra inferior, cada una con id, ícono y texto.
+- Los ids son los mismos que los de los destinos del grafo de navegación: así `MainActivity` sabe a qué destino ir al
+  tocar cada pestaña y qué pestaña marcar al llegar a un destino.
+
+### `res/navigation/nav_graph.xml` · creado por mí
+
+El **grafo de navegación**: las pantallas (destinos) de la app y cómo se llega a ellas.
+
+```xml
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/albumListFragment">
+```
+
+- `app:startDestination`: la pantalla con la que arranca la app (Álbumes). En el paso 5 cambia a la selección de rol.
+
+```xml
+    <!-- El contenido de cada pestaña lo construye su historia: Álbumes (HU01), Artistas (HU03), Coleccionistas (HU05). -->
+    <fragment
+        android:id="@+id/albumListFragment"
+        android:name="com.equipo2.vinilos.ui.common.EmptySectionFragment"
+        android:label="@string/album_list_title" />
+```
+
+- Cada `<fragment>` es un destino: `android:id` lo identifica, `android:name` es la clase del fragment y
+  `android:label` el título (lo usa `MainActivity` para la barra superior).
+- Los tres destinos usan `EmptySectionFragment` (pantalla vacía). Cada historia cambiará `android:name` por su propio
+  fragment; Álbumes lo hace en el paso 6.
+
+---
+
+### `res/layout/activity_main.xml` · modificado por mí
+
+Reemplaza el «Hello World!» por la estructura de la app.
+
+```xml
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+```
+
+- La raíz es un `CoordinatorLayout`: además de contener vistas, coordina componentes de Material; los avisos
+  (snackbar) del paso 4 se muestran dentro de él.
+
+```xml
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+```
+
+- Columna vertical con todo el contenido. Tiene id porque `MainActivity` le aplica el espacio de las barras del
+  sistema.
+
+```xml
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="64dp" />
+
+        <View
+            android:id="@+id/toolbarDivider"
+            style="@style/Widget.Vinilos.Divider" />
+```
+
+- La barra superior de Material (64 dp de alto, como la guía) y su línea divisora. El estilo de la barra viene del
+  tema (`toolbarStyle`), por eso aquí no hace falta repetirlo.
+
+```xml
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/navHost"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_graph" />
+```
+
+- El contenedor donde se muestran las pantallas (fragments).
+- `android:name="…NavHostFragment"`: el fragment de Navigation que cambia de pantalla según el grafo.
+- `layout_height="0dp"` + `layout_weight="1"`: en un `LinearLayout`, ocupa todo el alto que dejan libre las barras.
+- `app:defaultNavHost="true"`: el botón Atrás del sistema navega hacia atrás dentro del grafo.
+- `app:navGraph`: el grafo que usa.
+
+```xml
+        <View
+            android:id="@+id/bottomNavDivider"
+            style="@style/Widget.Vinilos.Divider" />
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:menu="@menu/bottom_nav" />
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+```
+
+- La línea divisora y la barra inferior con las opciones de `bottom_nav.xml`.
+- Los divisores y las barras tienen id porque en los pasos siguientes se ocultan en ciertas pantallas.
+
+### `res/layout/fragment_empty_section.xml` · creado por mí
+
+```xml
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_background" />
+```
+
+- Una pantalla vacía del color de fondo. El fondo es necesario para que, durante la transición, una pantalla no se vea
+  a través de la otra.
+
+---
+
+### `app/src/main/java/com/equipo2/vinilos/ui/common/Motion.kt` · creado por mí
+
+Las transiciones entre pantallas. El paquete `ui.common` agrupa lo que comparten todas las pantallas.
 
 ```kotlin
-/** Únicos valores que acepta BackVynils; cualquier otro responde 400. */
-object AlbumCatalog {
-    val genres = listOf("Classical", "Salsa", "Rock", "Folk")
-    val recordLabels = listOf("Sony Music", "EMI", "Discos Fuentes", "Elektra", "Fania Records")
+package com.equipo2.vinilos.ui.common
+
+import androidx.fragment.app.Fragment
+import com.google.android.material.transition.MaterialFadeThrough
+```
+
+```kotlin
+/** Transiciones entre pantallas de la sección 6.2 de la guía, con Material motion. */
+object Motion {
+
+    private const val TAB_DURATION_MS = 300L
+
+    /** Cambio de pestaña: la pantalla que sale se desvanece y la que entra aparece con fade y escala 0,92 → 1. */
+    fun fadeThrough() = MaterialFadeThrough().apply { duration = TAB_DURATION_MS }
 }
 ```
 
-- `object`: un *singleton*, una única instancia accesible como `AlbumCatalog.genres`.
-- Las dos listas son copia exacta de la validación de BackVynils (`Joi.string().valid(…)`); con otro valor la API
-  responde 400. El formulario del paso 7 las usa para los desplegables.
-
----
-
-### `app/src/main/java/com/equipo2/vinilos/data/network/AlbumDto.kt` · creado por mí
-
-Los **DTO** (*Data Transfer Objects*): la forma exacta del JSON que viaja por la red.
+- `MaterialFadeThrough` es la transición de Material para cambiar entre pantallas que no tienen relación entre sí
+  (como las pestañas): la que sale se desvanece y la que entra aparece con un leve zoom (de 0,92 a 1).
+- `.apply { duration = … }`: crea la transición y le cambia la duración a 300 ms, la que pide la guía.
+- Es una función (y no una sola instancia guardada) porque cada fragment necesita su propio objeto de transición.
 
 ```kotlin
-package com.equipo2.vinilos.data.network
-
-import kotlinx.serialization.Serializable
-```
-
-- `@Serializable` le pide al plugin que genere el código de conversión a JSON.
-
-```kotlin
-@Serializable
-data class AlbumDto(
-    val id: Int,
-    val name: String,
-    val cover: String,
-    val releaseDate: String,
-    val description: String,
-    val genre: String,
-    val recordLabel: String,
-)
-```
-
-- El álbum tal como lo responde la API.
-- Todos los campos son **obligatorios**, igual que en BackVynils, que los exige al crear y al actualizar. Si algún día
-  faltara uno, kotlinx.serialization lanzaría un error al leer la respuesta, el repositorio lo convertiría en un
-  `Result` de error y la pantalla lo mostraría, en lugar de enseñar un álbum incompleto como si estuviera bien.
-- `releaseDate` llega como texto (`"1984-08-01T00:00:00.000Z"`); se convierte a `LocalDate` en el Service Adapter.
-
-```kotlin
-@Serializable
-data class CreateAlbumRequest(
-    val name: String,
-    val cover: String,
-    val releaseDate: String,
-    val description: String,
-    val genre: String,
-    val recordLabel: String,
-)
-```
-
-- El cuerpo de `POST /albums`: los seis campos obligatorios de la API, con la fecha ya convertida a texto.
-
----
-
-### `app/src/main/java/com/equipo2/vinilos/data/network/VinilosApiService.kt` · creado por mí
-
-```kotlin
-package com.equipo2.vinilos.data.network
-
-import retrofit2.http.Body
-import retrofit2.http.POST
-
-interface VinilosApiService {
-
-    @POST("albums")
-    suspend fun createAlbum(@Body request: CreateAlbumRequest): AlbumDto
+fun Fragment.useTabTransitions() {
+    enterTransition = Motion.fadeThrough()
+    exitTransition = Motion.fadeThrough()
+    reenterTransition = Motion.fadeThrough()
+    returnTransition = Motion.fadeThrough()
 }
 ```
 
-- Retrofit genera la implementación de esta interfaz: cada función es un endpoint.
-- `@POST("albums")`: petición HTTP POST a `URL_BASE + "albums"`, es decir,
-  `https://backvynils-q6yc.onrender.com/albums`.
-- `suspend`: es una función de corrutina; espera la respuesta sin bloquear el hilo principal.
-- `@Body request`: el objeto se envía como cuerpo de la petición, convertido a JSON.
-- `: AlbumDto`: la respuesta JSON se convierte a `AlbumDto`. Si la API responde un error (4xx o 5xx), Retrofit lanza
-  una excepción `HttpException`.
-- Cada historia que necesite otro endpoint lo agrega aquí (por ejemplo, `GET /albums` para HU01).
+- Función de extensión: cualquier fragment puede llamar `useTabTransitions()`.
+- Un fragment tiene cuatro transiciones: al **entrar**, al **salir** porque se abre otra encima, al **volver a entrar**
+  cuando la de encima se cierra, y al **irse** cuando se cierra él mismo. Las pestañas usan *fade through* en las
+  cuatro.
+- Se usan transiciones de Material y no archivos de animación XML porque se ven más fluidas: interpolan cuadro a cuadro
+  y animan juntas la pantalla que sale y la que entra.
 
----
-
-### `app/src/main/java/com/equipo2/vinilos/data/network/NetworkServiceAdapter.kt` · creado por mí
-
-El **Service Adapter**: la única clase que conoce Retrofit, OkHttp y el formato del JSON. El resto de la app solo ve
-modelos (`Album`, `NewAlbum`).
+### `app/src/main/java/com/equipo2/vinilos/ui/common/EmptySectionFragment.kt` · creado por mí
 
 ```kotlin
-package com.equipo2.vinilos.data.network
+/** Pestaña que todavía no tiene contenido; cada historia la reemplaza por su propio fragment. */
+class EmptySectionFragment : Fragment(R.layout.fragment_empty_section) {
 
-import com.equipo2.vinilos.data.model.Album
-import com.equipo2.vinilos.data.model.NewAlbum
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.util.concurrent.TimeUnit
-```
-
-- Los modelos de la app, la configuración JSON, OkHttp, Retrofit, el conversor, las clases de fecha y `TimeUnit` para
-  los tiempos de espera.
-
-```kotlin
-/** Única puerta hacia BackVynils: oculta Retrofit y el JSON, y entrega modelos de la app. */
-class NetworkServiceAdapter(baseUrl: String) {
-```
-
-- Recibe la URL base por parámetro (en lugar de leer `BuildConfig` adentro): así una prueba podría crear un adaptador
-  apuntando a otro servidor.
-
-```kotlin
-    private val json = Json { ignoreUnknownKeys = true }
-```
-
-- Configuración de JSON. `ignoreUnknownKeys = true`: si la respuesta trae campos que `AlbumDto` no declara (BackVynils
-  devuelve más), los ignora en vez de fallar.
-
-```kotlin
-    // El backend vive en Render y la primera petición puede tardar mientras el servidor despierta.
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .build()
-```
-
-- El cliente HTTP con tiempos de espera de 30 s para conectar, leer y escribir. Los de OkHttp por defecto son 10 s,
-  muy poco cuando el servidor de Render está dormido.
-- `Builder()` → configurar → `build()` es el patrón *builder*.
-
-```kotlin
-    private val api = Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .client(client)
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .build()
-        .create(VinilosApiService::class.java)
-```
-
-- Crea Retrofit con la URL base, el cliente configurado y el conversor JSON (`application/json` es el tipo de
-  contenido que envía y espera).
-- `.create(VinilosApiService::class.java)`: Retrofit genera el objeto que implementa la interfaz.
-
-```kotlin
-    suspend fun createAlbum(album: NewAlbum): Album =
-        api.createAlbum(album.toRequest()).toAlbum()
-```
-
-- Convierte el modelo a DTO (`toRequest()`), llama a la API y convierte la respuesta en modelo (`toAlbum()`).
-- `= …`: función de una sola expresión, que devuelve ese resultado.
-
-```kotlin
-    companion object {
-        private const val TIMEOUT_SECONDS = 30L
-```
-
-- `companion object`: miembros de la clase, no de cada instancia (como `static` en Java).
-- `const val`: constante conocida al compilar. La `L` indica que es `Long`, el tipo que pide OkHttp.
-
-```kotlin
-        fun toApiDate(date: LocalDate): String = "${date}T00:00:00.000Z"
-```
-
-- Convierte una fecha al formato que guarda BackVynils: `LocalDate.toString()` produce `1984-08-01` y se le agrega la
-  medianoche en UTC (`T00:00:00.000Z`).
-- Es pública para poder probarla en el paso 9.
-
-```kotlin
-        fun fromApiDate(value: String): LocalDate = OffsetDateTime.parse(value).toLocalDate()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        useTabTransitions()
     }
 }
 ```
 
-- La conversión inversa: de `"1984-08-01T00:00:00.000Z"` a `LocalDate`.
-- `OffsetDateTime.parse(value)`: lee una fecha ISO con su zona horaria (la `Z` final es UTC).
-- `.toLocalDate()`: se queda con el día tal como viene escrito, sin pasarlo a la zona del teléfono. Así
-  `1984-08-01T00:00:00.000Z` es el 1 de agosto en cualquier país (pasado a la hora de Colombia serían las 7 p. m. del
-  31 de julio).
-- No se protege contra formatos inválidos: BackVynils siempre responde la fecha en ISO. Si no lo hiciera, la
-  excepción llega al repositorio, que la convierte en un error.
+- `Fragment(R.layout.fragment_empty_section)`: el constructor de `Fragment` acepta el layout a mostrar, así no hace
+  falta sobrescribir `onCreateView`.
+- En `onCreate` se asignan las transiciones; deben estar listas antes de que el fragment aparezca.
 
-```kotlin
-private fun NewAlbum.toRequest() = CreateAlbumRequest(
-    name = name,
-    cover = cover,
-    releaseDate = NetworkServiceAdapter.toApiDate(releaseDate),
-    description = description,
-    genre = genre,
-    recordLabel = recordLabel,
-)
-```
-
-- **Función de extensión**: agrega `toRequest()` a `NewAlbum` sin modificar esa clase. Es `private`, así que solo
-  existe en este archivo.
-- Copia cada campo usando argumentos con nombre (`name = name`), y convierte la fecha a texto.
-
-```kotlin
-private fun AlbumDto.toAlbum() = Album(
-    id = id,
-    name = name,
-    cover = cover,
-    releaseDate = NetworkServiceAdapter.fromApiDate(releaseDate),
-    description = description,
-    genre = genre,
-    recordLabel = recordLabel,
-)
-```
-
-- La conversión de la respuesta (`AlbumDto`) al modelo de la app (`Album`), con la fecha convertida a `LocalDate`.
-
----
-
-### `app/src/main/java/com/equipo2/vinilos/data/repository/AlbumRepository.kt` · creado por mí
-
-El **Repository**: lo que las pantallas (sus ViewModels) le piden a los datos. Hoy solo hay red, pero si mañana se
-agrega una caché local, solo cambia el repositorio.
-
-```kotlin
-package com.equipo2.vinilos.data.repository
-
-import com.equipo2.vinilos.data.model.Album
-import com.equipo2.vinilos.data.model.NewAlbum
-import com.equipo2.vinilos.data.network.NetworkServiceAdapter
-```
-
-```kotlin
-interface AlbumRepository {
-    suspend fun createAlbum(album: NewAlbum): Result<Album>
-}
-```
-
-- Una **interfaz**: los ViewModels dependen de ella y no de la implementación. Así las pruebas pueden darles un
-  repositorio falso (por ejemplo, uno que siempre falla).
-- `Result<Album>`: tipo de Kotlin que contiene el álbum creado **o** el error. Obliga a quien lo llama a manejar los
-  dos casos y evita que una excepción de red cierre la app.
-
-```kotlin
-class AlbumRepositoryImpl(private val adapter: NetworkServiceAdapter) : AlbumRepository {
-
-    override suspend fun createAlbum(album: NewAlbum): Result<Album> = resultOf { adapter.createAlbum(album) }
-}
-```
-
-- La implementación real: recibe el Service Adapter en el constructor (inyección de dependencias) y envuelve la
-  llamada en `resultOf` (archivo siguiente).
-
----
-
-### `app/src/main/java/com/equipo2/vinilos/data/repository/ResultOf.kt` · creado por mí
-
-```kotlin
-package com.equipo2.vinilos.data.repository
-
-import kotlin.coroutines.cancellation.CancellationException
-
-/**
- * Lo usan todos los repositorios para devolver un Result. Es como runCatching, pero deja pasar la cancelación de la
- * corrutina en lugar de tratarla como un error.
- */
-internal suspend fun <T> resultOf(block: suspend () -> T): Result<T> = try {
-    Result.success(block())
-} catch (e: CancellationException) {
-    throw e
-} catch (e: Exception) {
-    Result.failure(e)
-}
-```
-
-- Va en su **propio archivo** porque no es de los álbumes: cada repositorio nuevo de las otras historias
-  (`ArtistRepository`, `CollectorRepository`, `PrizeRepository`…) lo usa igual que `AlbumRepositoryImpl`.
-- `CancellationException`: la excepción con la que Kotlin cancela una corrutina.
-- Función genérica (`<T>`): sirve para cualquier tipo de resultado (`Album`, una lista de artistas…).
-- `internal`: visible en todo el módulo `app`, pero no fuera de él.
-- Ejecuta el bloque: si termina bien devuelve `Result.success`; si lanza una excepción (sin red, timeout, 400, 500)
-  devuelve `Result.failure`.
-- La cancelación se vuelve a lanzar (`throw e`). Si el usuario sale de la pantalla mientras se guarda, la corrutina
-  debe cancelarse de verdad, no convertirse en un "error al guardar". `runCatching` de Kotlin no hace esta distinción.
-
----
-
-### `app/src/main/java/com/equipo2/vinilos/ServiceLocator.kt` · creado por mí
-
-**Inyección de dependencias manual**: un lugar que crea cada dependencia una vez y se la entrega a quien la necesite.
+### `app/src/main/java/com/equipo2/vinilos/MainActivity.kt` · modificado por mí
 
 ```kotlin
 package com.equipo2.vinilos
 
-import androidx.annotation.VisibleForTesting
-import com.equipo2.vinilos.data.network.NetworkServiceAdapter
-import com.equipo2.vinilos.data.repository.AlbumRepository
-import com.equipo2.vinilos.data.repository.AlbumRepositoryImpl
+import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navOptions
+import com.equipo2.vinilos.databinding.ActivityMainBinding
+import kotlin.math.max
 ```
 
+- Nuevos: las clases de Navigation, `ActivityMainBinding` (generada por View Binding a partir de `activity_main.xml`)
+  y `max`.
+
 ```kotlin
-/** Inyección de dependencias manual: crea cada dependencia una sola vez y la comparte. */
-object ServiceLocator {
+/** Actividad única: barra superior, contenedor de navegación y barra inferior. */
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 ```
 
-- `object`: una sola instancia en toda la app.
+- "Actividad única": toda la app vive en esta actividad y las pantallas son fragments.
+- `lateinit var`: la propiedad se asigna en `onCreate`, no en el constructor. Kotlin permite declararla sin valor
+  inicial con la promesa de asignarla antes de usarla.
 
 ```kotlin
-    private val networkServiceAdapter by lazy { NetworkServiceAdapter(BuildConfig.API_BASE_URL) }
-    private val defaultAlbumRepository by lazy { AlbumRepositoryImpl(networkServiceAdapter) }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applyWindowInsets()
 ```
 
-- `by lazy { … }`: el objeto se crea la primera vez que se usa, no al abrir la app, y después se reutiliza.
-- El adaptador recibe la URL de `BuildConfig`, y el repositorio recibe el adaptador.
+- `ActivityMainBinding.inflate(layoutInflater)`: crea las vistas del layout y devuelve el *binding* con todas ellas.
+- `setContentView(binding.root)`: muestra la vista raíz. Reemplaza al `setContentView(R.layout.activity_main)` de la
+  plantilla.
 
 ```kotlin
-    @VisibleForTesting
-    var albumRepositoryOverride: AlbumRepository? = null
+        navController = binding.navHost.getFragment<NavHostFragment>().navController
+        navController.addOnDestinationChangedListener { _, destination, _ -> onDestinationChanged(destination) }
+        setUpBottomNavigation()
+    }
 ```
 
-- Un repositorio de reemplazo, nulo por defecto. Las pruebas E2E del paso 9 lo usan para simular que el servidor falla.
-- `@VisibleForTesting`: indica (y Lint lo vigila) que solo las pruebas deberían cambiarlo.
+- `binding.navHost.getFragment<NavHostFragment>()`: el `NavHostFragment` que vive dentro del contenedor; su
+  `navController` es quien cambia de pantalla.
+- `addOnDestinationChangedListener`: se ejecuta cada vez que cambia la pantalla. Los `_` son parámetros que no se usan
+  (el controlador y los argumentos).
 
 ```kotlin
-    val albumRepository: AlbumRepository
-        get() = albumRepositoryOverride ?: defaultAlbumRepository
+    private fun applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.content) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val keyboard = insets.getInsets(WindowInsetsCompat.Type.ime())
+            view.setPadding(bars.left, bars.top, bars.right, max(bars.bottom, keyboard.bottom))
+            WindowInsetsCompat.CONSUMED
+        }
+    }
+```
+
+- Es la misma idea de la plantilla, ahora aplicada a la columna de contenido y teniendo en cuenta el **teclado**
+  (`ime`): abajo se usa el mayor entre la barra de navegación y el teclado, para que el formulario del paso 7 no quede
+  tapado.
+- `WindowInsetsCompat.CONSUMED`: los insets ya se usaron aquí y no se pasan a las vistas hijas (si no, se aplicarían
+  dos veces).
+
+```kotlin
+    /** Cada pestaña conserva su estado y, desde Artistas o Coleccionistas, Atrás vuelve a Álbumes. */
+    private fun setUpBottomNavigation() {
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            if (navController.currentDestination?.id != item.itemId) {
+                navController.navigate(item.itemId, null, navOptions {
+                    launchSingleTop = true
+                    restoreState = true
+                    popUpTo(R.id.albumListFragment) { saveState = true }
+                })
+            }
+            true
+        }
+        binding.bottomNav.setOnItemReselectedListener { }
+    }
+```
+
+- Al tocar una pestaña se navega a su destino (el id del menú es el id del destino).
+- `launchSingleTop`: si ya está arriba, no crea otra copia.
+- `popUpTo(R.id.albumListFragment) { saveState = true }`: antes de ir a la pestaña, cierra todo lo que haya encima de
+  Álbumes, guardando su estado. Por eso Atrás desde Artistas vuelve a Álbumes.
+- `restoreState`: si se vuelve a una pestaña que ya se visitó, recupera su estado guardado.
+- Devolver `true` marca la pestaña como seleccionada.
+- `setOnItemReselectedListener { }`: tocar la pestaña activa no hace nada.
+- No se usa `setupWithNavController` (la conexión automática de Navigation) porque esa función vuelve siempre al
+  destino inicial del grafo, que en el paso 5 será la selección de rol.
+
+```kotlin
+    private fun onDestinationChanged(destination: NavDestination) {
+        binding.toolbar.title = destination.label
+        binding.bottomNav.menu.findItem(destination.id)?.isChecked = true
+    }
 }
 ```
 
-- Lo que usa la app: el de reemplazo si existe y, si no (`?:`, el operador Elvis), el real.
-- `get() = …`: un *getter* que se evalúa cada vez que se lee la propiedad, para que un cambio del reemplazo se note
-  enseguida.
+- En cada cambio de pantalla: el título de la barra superior es el `android:label` del destino, y se marca la pestaña
+  correspondiente (por ejemplo, al volver con Atrás). `?.` evita un error si el destino no es una pestaña.
 
 ---
 
 ## Qué sigue
 
-En el paso 3 (T2) se crea la base visual: los colores del diseño en claro y oscuro, la tipografía, la barra superior,
-la barra inferior con las pestañas Álbumes, Artistas y Coleccionistas, y las transiciones entre pantallas.
+En el paso 4 (T3) se crean los componentes que comparten todas las pantallas: carga, error con «Reintentar», vacío y
+avisos. Quedan listos para que las demás historias los usen.

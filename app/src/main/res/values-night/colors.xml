@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tokens de color de la guía de diseño (sección 5.1), tema oscuro. -->
+<resources>
+    <color name="md_primary">#CDA8FF</color>
+    <color name="md_on_primary">#1E1A26</color>
+    <color name="md_primary_container">#4A2775</color>
+    <color name="md_on_primary_container">#F0E2FF</color>
+    <color name="md_inverse_primary">#6A2FA0</color>
+    <color name="md_secondary">#CCC2DC</color>
+    <color name="md_on_secondary">#332D41</color>
+    <color name="md_secondary_container">#4A4458</color>
+    <color name="md_on_secondary_container">#E8DEF8</color>
+    <color name="md_tertiary">#FF9E7A</color>
+    <color name="md_on_tertiary">#1E1A26</color>
+    <color name="md_background">#14111A</color>
+    <color name="md_on_background">#EEE8F5</color>
+    <color name="md_surface">#14111A</color>
+    <color name="md_on_surface">#EEE8F5</color>
+    <color name="md_surface_variant">#2F2839</color>
+    <color name="md_on_surface_variant">#C5BCD3</color>
+    <color name="md_surface_container_lowest">#1E1A26</color>
+    <color name="md_surface_container">#26212F</color>
+    <color name="md_surface_container_high">#29233A</color>
+    <color name="md_outline">#968CA6</color>
+    <color name="md_outline_variant">#352E40</color>
+    <color name="md_error">#F2B8B5</color>
+    <color name="md_on_error">#601410</color>
+    <color name="md_error_container">#8C1D18</color>
+    <color name="md_on_error_container">#F9DEDC</color>
+    <color name="md_inverse_surface">#EEE8F5</color>
+    <color name="md_inverse_on_surface">#1E1A26</color>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/albumListFragment">
+
+    <!-- El contenido de cada pestaña lo construye su historia: Álbumes (HU01), Artistas (HU03), Coleccionistas (HU05). -->
+    <fragment
+        android:id="@+id/albumListFragment"
+        android:name="com.equipo2.vinilos.ui.common.EmptySectionFragment"
+        android:label="@string/album_list_title" />
+
+    <fragment
+        android:id="@+id/artistsFragment"
+        android:name="com.equipo2.vinilos.ui.common.EmptySectionFragment"
+        android:label="@string/artist_list_title" />
+
+    <fragment
+        android:id="@+id/collectorsFragment"
+        android:name="com.equipo2.vinilos.ui.common.EmptySectionFragment"
+        android:label="@string/collector_list_title" />
+</navigation>

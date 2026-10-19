@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Los ids coinciden con los destinos de nav_graph.xml. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/albumListFragment"
+        android:icon="@drawable/ic_album"
+        android:title="@string/nav_albums" />
+    <item
+        android:id="@+id/artistsFragment"
+        android:icon="@drawable/ic_mic"
+        android:title="@string/nav_artists" />
+    <item
+        android:id="@+id/collectorsFragment"
+        android:icon="@drawable/ic_groups"
+        android:title="@string/nav_collectors" />
+</menu>
