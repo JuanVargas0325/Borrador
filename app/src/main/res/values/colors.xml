@@ -33,4 +33,6 @@
     <color name="md_inverse_surface">#2A2335</color>
     <color name="md_inverse_on_surface">#F3EDFA</color>
     <color name="launcher_background">#6A2FA0</color>
+    <color name="white_18">#2EFFFFFF</color>
+    <color name="logo_groove">#14F6F4F9</color>
 </resources>

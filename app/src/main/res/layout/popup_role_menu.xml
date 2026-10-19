@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/role_menu_width"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/menuHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:textAppearance="@style/TextAppearance.Vinilos.LabelMedium"
+        android:textColor="@color/md_on_surface_variant"
+        tools:text="MODO ACTUAL: VISITANTE" />
+
+    <LinearLayout
+        android:id="@+id/optionVisitor"
+        style="@style/Widget.Vinilos.MenuRow"
+        android:minHeight="56dp">
+
+        <ImageView
+            style="@style/Widget.Vinilos.MenuRow.Icon"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_person" />
+
+        <LinearLayout style="@style/Widget.Vinilos.MenuRow.Texts">
+
+            <TextView
+                style="@style/Widget.Vinilos.MenuRow.Title"
+                android:text="@string/role_visitor" />
+
+            <TextView
+                style="@style/Widget.Vinilos.MenuRow.Description"
+                android:text="@string/role_visitor_desc" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/checkVisitor"
+            style="@style/Widget.Vinilos.MenuRow.Check"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/optionCollector"
+        style="@style/Widget.Vinilos.MenuRow"
+        android:minHeight="56dp">
+
+        <ImageView
+            style="@style/Widget.Vinilos.MenuRow.Icon"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_album" />
+
+        <LinearLayout style="@style/Widget.Vinilos.MenuRow.Texts">
+
+            <TextView
+                style="@style/Widget.Vinilos.MenuRow.Title"
+                android:text="@string/role_collector" />
+
+            <TextView
+                style="@style/Widget.Vinilos.MenuRow.Description"
+                android:text="@string/role_collector_desc" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/checkCollector"
+            style="@style/Widget.Vinilos.MenuRow.Check"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <View
+        style="@style/Widget.Vinilos.Divider"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp" />
+
+    <LinearLayout
+        android:id="@+id/optionDarkMode"
+        style="@style/Widget.Vinilos.MenuRow"
+        android:minHeight="56dp">
+
+        <ImageView
+            style="@style/Widget.Vinilos.MenuRow.Icon"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_dark_mode" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchDarkMode"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/role_menu_dark_mode"
+            android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+            android:textColor="@color/md_on_surface" />
+    </LinearLayout>
+
+    <View
+        style="@style/Widget.Vinilos.Divider"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp" />
+
+    <LinearLayout
+        android:id="@+id/optionGoHome"
+        style="@style/Widget.Vinilos.MenuRow"
+        android:minHeight="48dp">
+
+        <ImageView
+            style="@style/Widget.Vinilos.MenuRow.Icon"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_home" />
+
+        <TextView
+            style="@style/Widget.Vinilos.MenuRow.Title"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="@string/role_menu_go_home" />
+    </LinearLayout>
+</LinearLayout>

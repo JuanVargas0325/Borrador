@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_background">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingTop="32dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="32dp">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:contentDescription="@string/cd_logo"
+                android:src="@drawable/ic_vinilos_logo" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/app_name"
+                android:textAppearance="@style/TextAppearance.Vinilos.DisplaySmall" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:maxWidth="300dp"
+                android:text="@string/role_select_tagline"
+                android:textAppearance="@style/TextAppearance.Vinilos.BodyLarge"
+                android:textColor="@color/md_on_surface_variant" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:text="@string/role_select_question"
+                android:textAppearance="@style/TextAppearance.Vinilos.LabelLarge"
+                android:textColor="@color/md_on_surface_variant" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btnVisitor"
+                style="@style/Widget.Vinilos.RoleButton"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/md_primary"
+                app:strokeWidth="0dp">
+
+                <LinearLayout style="@style/Widget.Vinilos.RoleButton.Content">
+
+                    <FrameLayout
+                        style="@style/Widget.Vinilos.RoleButton.IconCircle"
+                        android:background="@drawable/bg_circle_white_18">
+
+                        <ImageView
+                            style="@style/Widget.Vinilos.RoleButton.Icon"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/md_on_primary" />
+                    </FrameLayout>
+
+                    <LinearLayout style="@style/Widget.Vinilos.RoleButton.Texts">
+
+                        <TextView
+                            style="@style/Widget.Vinilos.RoleButton.Title"
+                            android:text="@string/role_visitor_enter"
+                            android:textColor="@color/md_on_primary" />
+
+                        <TextView
+                            style="@style/Widget.Vinilos.RoleButton.Description"
+                            android:text="@string/role_visitor_enter_desc"
+                            android:textColor="@color/md_on_primary" />
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Widget.Vinilos.RoleButton.Chevron"
+                        android:importantForAccessibility="no"
+                        app:tint="@color/md_on_primary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btnCollector"
+                style="@style/Widget.Vinilos.RoleButton"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/md_surface_container_lowest"
+                app:strokeColor="@color/md_outline"
+                app:strokeWidth="1dp">
+
+                <LinearLayout style="@style/Widget.Vinilos.RoleButton.Content">
+
+                    <FrameLayout
+                        style="@style/Widget.Vinilos.RoleButton.IconCircle"
+                        android:background="@drawable/bg_circle_primary_container">
+
+                        <ImageView
+                            style="@style/Widget.Vinilos.RoleButton.Icon"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_album"
+                            app:tint="@color/md_on_primary_container" />
+                    </FrameLayout>
+
+                    <LinearLayout style="@style/Widget.Vinilos.RoleButton.Texts">
+
+                        <TextView
+                            style="@style/Widget.Vinilos.RoleButton.Title"
+                            android:text="@string/role_collector_enter"
+                            android:textColor="@color/md_on_surface" />
+
+                        <TextView
+                            style="@style/Widget.Vinilos.RoleButton.Description"
+                            android:text="@string/role_collector_enter_desc"
+                            android:textColor="@color/md_on_surface_variant" />
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Widget.Vinilos.RoleButton.Chevron"
+                        android:importantForAccessibility="no"
+                        app:tint="@color/md_on_surface_variant" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:text="@string/role_select_footer"
+                android:textAppearance="@style/TextAppearance.Vinilos.BodyMedium"
+                android:textColor="@color/md_on_surface_variant" />
+        </LinearLayout>
+    </ScrollView>
+
+    <ImageButton
+        android:id="@+id/btnTheme"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/cd_dark_mode_on"
+        android:src="@drawable/ic_dark_mode"
+        app:tint="@color/md_on_surface_variant" />
+</FrameLayout>

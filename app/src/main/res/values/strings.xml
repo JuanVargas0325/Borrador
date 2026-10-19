@@ -8,9 +8,31 @@
     <string name="artist_list_title">Artistas</string>
     <string name="collector_list_title">Coleccionistas</string>
 
+    <string name="role_select_tagline">Explora álbumes, artistas y coleccionistas de música en vinilo.</string>
+    <string name="role_select_question">¿Cómo quieres entrar?</string>
+    <string name="role_visitor_enter">Entrar como visitante</string>
+    <string name="role_visitor_enter_desc">Consulta álbumes, artistas y coleccionistas.</string>
+    <string name="role_collector_enter">Entrar como coleccionista</string>
+    <string name="role_collector_enter_desc">Además puedes crear y completar álbumes y artistas.</string>
+    <string name="role_select_footer">Puedes cambiar de rol en cualquier momento desde la barra superior.</string>
+
+    <string name="role_visitor">Visitante</string>
+    <string name="role_collector">Coleccionista</string>
+    <string name="role_menu_current">MODO ACTUAL: %1$s</string>
+    <string name="role_visitor_desc">Solo consulta</string>
+    <string name="role_collector_desc">Crea álbumes y agrega tracks</string>
+    <string name="role_menu_dark_mode">Modo oscuro</string>
+    <string name="role_menu_go_home">Volver a la pantalla de inicio</string>
+    <string name="snackbar_role_visitor">Ahora estás en modo visitante</string>
+    <string name="snackbar_role_collector">Ahora estás en modo coleccionista</string>
+
     <string name="loading_default">Cargando…</string>
     <string name="error_load_title">No pudimos cargar %1$s</string>
     <string name="error_network_body">Revisa tu conexión a internet e inténtalo de nuevo.</string>
     <string name="error_network_retry">Reintentar</string>
     <string name="cd_close_snackbar">Cerrar aviso</string>
+    <string name="cd_change_role">Cambiar de rol. Modo actual: %1$s</string>
+    <string name="cd_dark_mode_on">Activar modo oscuro</string>
+    <string name="cd_dark_mode_off">Activar modo claro</string>
+    <string name="cd_logo">Logotipo de Vinilos: un disco de vinilo</string>
 </resources>

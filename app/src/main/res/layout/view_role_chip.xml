@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chip de rol: 32 dp visibles (el fondo) dentro de un área táctil de 48 dp (la vista). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/touch_target"
+    android:background="@drawable/bg_role_chip"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="4dp"
+    android:paddingEnd="6dp">
+
+    <FrameLayout
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@drawable/bg_circle_primary_container">
+
+        <ImageView
+            android:id="@+id/roleChipIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            app:tint="@color/md_on_primary_container"
+            tools:src="@drawable/ic_album" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/roleChipText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:importantForAccessibility="no"
+        android:textAppearance="@style/TextAppearance.Vinilos.LabelLarge"
+        android:textColor="@color/md_on_surface"
+        tools:text="Coleccionista" />
+
+    <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="4dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_expand_more"
+        app:tint="@color/md_on_surface_variant" />
+</LinearLayout>

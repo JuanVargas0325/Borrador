@@ -3,4 +3,7 @@
     <dimen name="touch_target">48dp</dimen>
     <dimen name="snackbar_icon">20dp</dimen>
     <dimen name="snackbar_icon_padding">12dp</dimen>
+    <dimen name="popup_elevation">3dp</dimen>
+    <dimen name="role_menu_width">280dp</dimen>
+    <dimen name="role_menu_offset">4dp</dimen>
 </resources>

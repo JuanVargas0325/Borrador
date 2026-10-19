@@ -30,4 +30,5 @@
     <color name="md_on_error_container">#F9DEDC</color>
     <color name="md_inverse_surface">#EEE8F5</color>
     <color name="md_inverse_on_surface">#1E1A26</color>
+    <color name="logo_groove">#1414111A</color>
 </resources>

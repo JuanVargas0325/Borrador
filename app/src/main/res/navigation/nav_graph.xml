@@ -2,7 +2,18 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/albumListFragment">
+    app:startDestination="@id/roleSelectFragment">
+
+    <fragment
+        android:id="@+id/roleSelectFragment"
+        android:name="com.equipo2.vinilos.ui.role.RoleSelectFragment"
+        android:label="">
+        <action
+            android:id="@+id/action_roleSelect_to_albums"
+            app:destination="@id/albumListFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
 
     <!-- El contenido de cada pestaña lo construye su historia: Álbumes (HU01), Artistas (HU03), Coleccionistas (HU05). -->
     <fragment
@@ -19,4 +30,10 @@
         android:id="@+id/collectorsFragment"
         android:name="com.equipo2.vinilos.ui.common.EmptySectionFragment"
         android:label="@string/collector_list_title" />
+
+    <action
+        android:id="@+id/action_global_roleSelect"
+        app:destination="@id/roleSelectFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
 </navigation>

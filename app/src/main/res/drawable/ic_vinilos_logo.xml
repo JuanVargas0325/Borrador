@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo de la guía (sección 14). Toma los colores del tema, así que cambia en modo oscuro. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <path
+        android:fillColor="@color/md_on_surface"
+        android:pathData="M60,0a60,60 0,1 1,0 120a60,60 0,1 1,0 -120z" />
+    <path
+        android:pathData="M60,12a48,48 0,1 1,0 96a48,48 0,1 1,0 -96zM60,22a38,38 0,1 1,0 76a38,38 0,1 1,0 -76zM60,30a30,30 0,1 1,0 60a30,30 0,1 1,0 -60z"
+        android:strokeWidth="1"
+        android:strokeColor="@color/logo_groove" />
+    <path
+        android:fillColor="@color/md_background"
+        android:pathData="M60,38a22,22 0,1 1,0 44a22,22 0,1 1,0 -44z" />
+    <path
+        android:fillColor="@color/md_primary"
+        android:pathData="M60,46a14,14 0,1 1,0 28a14,14 0,1 1,0 -28z" />
+    <path
+        android:fillColor="@color/md_on_surface"
+        android:pathData="M60,57.5a2.5,2.5 0,1 1,0 5a2.5,2.5 0,1 1,0 -5z" />
+</vector>
